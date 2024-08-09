@@ -6,6 +6,30 @@ const bcrypt =  require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const adminLayout = '../views/layout/admin';
+const jwtSecret = process.env.JWT_SECRET;
+
+
+/**
+ * 
+ * Check Login
+ */
+
+const authMiddleware = (req, res, next) => {
+    const token = req.cookies.token;
+
+    if(!token) {
+        return res.status(401).json( {message: 'Unauthorized'});
+    }
+
+    try {
+        const decoded = jwt.verify(token, jwtSecret);
+        req.userId = decoded.userId;
+        next();
+    } catch (error) {
+        res.status(401).json( { message: 'Unauthorized'});
+    }
+}
+
 
 /**
  * GET /
@@ -37,15 +61,122 @@ adminRouter
         try {
             const { username, password } = req.body;
 
-            if(req.body === 'admin' && req.body.password === 'password') {
-                res.send('logged in');
-            } else {
-                res.send('Wrong username or password')
+            const user =  await User.findOne( { username } )
+            
+            if(!user) {
+                return res.status(401).json( {message: 'Invalid credentials'} )
+            }
+
+            const isPasswordValid = await bcrypt.compare(password, user.password);
+
+            if(!isPasswordValid) {
+                return res.status(401).json( { message: 'Invalid credentials' });
+            }
+
+            const token = jwt.sign({userId: user._id}, jwtSecret);
+            res.cookie('token', token, { httpOnly: true });
+            res.redirect('/dashboard');
+
+            } catch (error) {
+                console.log(error);
+            }
+    })
+
+
+    // .post('/admin', async (req, res) => {
+    //     try {
+    //         const { username, password } = req.body;
+
+    //         if(req.body === 'admin' && req.body.password === 'password') {
+    //             res.send('logged in');
+    //         } else {
+    //             res.send('Wrong username or password')
+    //         }
+
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // })
+    
+
+/**
+ * POST /
+ * Admin - Check Login
+ */
+    .get('/dashboard', authMiddleware, async (req, res) => {
+        res.render('admin/dashboard');
+    })
+
+
+/**
+ * POST /
+ * Admin Dashboard
+ */
+
+    .get('/dashboard', authMiddleware, async (req, res) => {
+        try {
+            const locals = {
+                title: 'Dashboard',
+                description: 'Simple Blog created with NodeJs, Express & MongoDb.'
+            }
+
+            const data = await Post.find();
+            res.render('admin/dashboard', {
+                locals,
+                data,
+                layout: adminLayout,
+            });
+        } catch (error) {
+            console.log(error)
+        }
+    })
+
+
+/**
+ * GET /
+ * Admin - Create New Post
+ */
+
+    .get('/add-post', authMiddleware, async (req, res) => {
+        try {
+
+            try {
+                const newPost = new Post({
+                title: req.body.title,
+                body: req.body.body
+                });
+                await Post.create(newPost);
+                res.redirect('/dashboard')
+            } catch (error) {
+                console.log(error);
             }
 
         } catch (error) {
-            console.log(error);
+            console.log(error)
         }
+    })
+
+
+
+/**
+ * PUT /
+ * Admin - Create New Post
+*/
+    .put('/edit-post/:id', authMiddleware, async (req, res) => {
+        try {
+    
+        await Post.findByIdAndUpdate(req.params.id, {
+            title: req.body.title,
+            body: req.body.body,
+            updatedAt: Date.now()
+        });
+    
+        res.redirect(`/edit-post/${req.params.id}`);
+    
+        } catch (error) {
+        console.log(error);
+        }
+    
     })
 
 
@@ -74,6 +205,31 @@ adminRouter
             console.log(error);
         }
     })
+
+    /**
+ * DELETE /
+ * Admin - Delete Post
+*/
+    .delete('/delete-post/:id', authMiddleware, async (req, res) => {
+
+        try {
+        await Post.deleteOne( { _id: req.params.id } );
+        res.redirect('/dashboard');
+        } catch (error) {
+        console.log(error);
+        }
+    
+    })
+  
+    /**
+     * GET /
+     * Admin Logout
+     */
+    .get('/logout', (req, res) => {
+        res.clearCookie('token');
+        //res.json({ message: 'Logout successful.'});
+        res.redirect('/');
+    });
 
 
 module.exports = {

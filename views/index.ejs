@@ -1,13 +1,13 @@
 <div class="author">
-    <h1 class="author__heading">Wejdź za kulisy polityki<h1>
-    <p class="author__body">Autorem blogu jest osoba pod pseudonimem Demokryt</p>
+    <h1 class="author__heading">Odkryj historię z innej strony<h1>
+    <p class="author__body">Autorem blogu jest Demokryt</p>
     <script src="https://kit.fontawesome.com/3bf02ae6ba.js" crossorigin="anonymous"></script>
 </div>
 
-<img src="/img/politics-second.jpg" alt="Politics" class="hero-image" width="981" height="528">
+<img src="/img/politics-second.jpg" alt="Politics" class="politics-image" width="981" height="528">
 
 <section class="articles">
-    <h2 class="articles__heading">Latest Posts</h2>
+    <h2 class="articles__heading">Ostatnie Posty</h2>
 
     <ul class="article-ul">
         <% data.forEach(post=> { %>
@@ -21,7 +21,7 @@
     </ul>
 
     <% if (nextPage !== null) {   %>
-        <a href="/?page=<% nextPage %>" class="pagination">&lt; View Older Posts</a>
+        <a href="/?page=<% nextPage %>" class="pagination">&lt; Zonacz Starsze Posty</a>
     <% } %>
 
 </section>

@@ -4,7 +4,14 @@ const Post = require('../models/Post');
 
 router
     .get('/about', (req, res) => {
-        res.render('about');
+        res.render('about', {
+            currentRoute: '/about',
+        });
+    })
+
+
+    .get('/contact', (req, res) => {
+        res.render('contact');
     })
 
     .get('/', async (req, res) => {
@@ -30,7 +37,8 @@ router
             locals,
             data,
             current: page,
-            nextPage: hasNextPage ? nextPage : null
+            nextPage: hasNextPage ? nextPage : null,
+            currentRoute: '/',
         });
 
         } catch(error) {
@@ -49,7 +57,7 @@ router
                 description: "Simple Blog created with NodeJs, Express & MongoDb",
             }
             
-            res.render('post', {locals, data},
+            res.render('post', {locals, data, currentRoute: `/post/${slug}`,},
         );
         } catch(error) {
             console.log(error);
