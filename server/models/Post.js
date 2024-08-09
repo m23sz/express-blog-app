@@ -1,6 +1,6 @@
-const mongoose = require('moongoose');
+const mongoose = require('mongoose');
 
-const Schema = moongose.Schema
+const Schema = mongoose.Schema;
 const PostSchema =  new Schema({
     title: {
         type: String,

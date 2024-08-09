@@ -12,8 +12,12 @@ const PORT= 5000 || process.env.PORT;
 // Connect to DB
 connectDB();
 
+
 //Midlewares
 app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
 
 //Templating Engine
 app.use(expressLayout);
