@@ -20,5 +20,4 @@ document.addEventListener('DOMContentLoaded', function(){
         this.setAttribute('aria-expanded', 'false');
     })
 
-
 })
